@@ -1,7 +1,7 @@
 import sympy as sp
 from sympy.logic.boolalg import Or, And
 
-_op_identity = {'&': True, '|': False}
+_op_identity = {And: True, Or: False}
 
 
 def unique(sequence):
@@ -25,7 +25,7 @@ def dissociate(op, args):
 
     def collect(subargs):
         for arg in subargs:
-            if arg.op == op:
+            if arg.func == op:
                 collect(arg.args)
             else:
                 result.append(arg)

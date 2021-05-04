@@ -1,7 +1,7 @@
 import sympy as sp
 from sympy.logic.boolalg import true, false, And, Or, Implies, Not, Equivalent
 from entailment import entails
-
+from cnf import to_cnf
 
 class BeliefBase:
     def __init__(self, beliefs = []):
@@ -9,7 +9,7 @@ class BeliefBase:
 
     def contract(self, formula, order):
         """ Removes the input logical expression formula from the belief base """
-        f = sp.to_cnf(formula, simplify=True)
+        f = to_cnf(formula, simplify=True)
 
         for belief in self.beliefs:
             f_bb = belief.formula
@@ -17,7 +17,7 @@ class BeliefBase:
     
     def expand(self, formula):
         """ Add the input logical expression formula to the belief base """
-        formula = sp.to_cnf(formula, simplify=True)
+        formula = to_cnf(formula, simplify=True)
         return NotImplementedError
     
     def instantiate(self, formula):

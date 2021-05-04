@@ -2,12 +2,12 @@ import sympy as sp
 from sympy.logic.boolalg import Or
 
 from utils import unique, conjuncts, disjuncts, associate
-
+from cnf import to_cnf
 
 def entails(bb, formula):
     """ Check Entailment of given formula in belief base bb """
 
-    formula = sp.to_cnf(formula)
+    formula = to_cnf(formula)
 
     # Split all formulas from belief base into conjuncts
     sentences = []
