@@ -45,3 +45,8 @@ def associate(op, args):
         return args[0]
     else:
         return op(*args)
+
+
+def first(iterable, default=None):
+    """ Returns the first element of an iterable """
+    return next(iter(iterable), default)

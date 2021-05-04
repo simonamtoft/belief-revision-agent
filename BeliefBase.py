@@ -3,6 +3,7 @@ from sympy.logic.boolalg import true, false, And, Or, Implies, Not, Equivalent
 from entailment import entails
 from cnf import to_cnf
 
+
 class BeliefBase:
     def __init__(self, beliefs = []):
         self.beliefs = beliefs

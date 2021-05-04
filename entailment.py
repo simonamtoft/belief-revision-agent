@@ -4,6 +4,7 @@ from sympy.logic.boolalg import Or
 from utils import unique, conjuncts, disjuncts, associate
 from cnf import to_cnf
 
+
 def entails(bb, formula):
     """ Check Entailment of given formula in belief base bb """
 
