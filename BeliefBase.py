@@ -1,40 +1,32 @@
 import sympy as sp
-from sympy.logic.boolalg import true, false, And, Or, Amplies, Not
+from sympy.logic.boolalg import true, false, And, Or, Implies, Not, Equivalent
+from entailment import entails
 
 
 class BeliefBase:
     def __init__(self, beliefs = []):
         self.beliefs = beliefs
-    
-    def entails(self, formula):
-        """ Check BLABLA """
-        
-        # Some helpers
-        def pl_true(KB, model={}):
-            pass
-        def tt_check_all(KB, formula, symbols, model):
-            pass
 
-        formula = sp.to_cnf(formula, simplify=True)
-        pass
-
-    def contract(self, formula):
+    def contract(self, formula, order):
         """ Removes the input logical expression formula from the belief base """
-        formula = sp.to_cnf(formula, simplify=True)
-        pass
+        f = sp.to_cnf(formula, simplify=True)
+
+        for belief in self.beliefs:
+            f_bb = belief.formula
+        return NotImplementedError
     
     def expand(self, formula):
         """ Add the input logical expression formula to the belief base """
         formula = sp.to_cnf(formula, simplify=True)
-        pass
+        return NotImplementedError
     
     def instantiate(self, formula):
         """ Instantiate the Belief Base with some predetermined beliefs """
-        b_str = [
-            "a|b",
-            "c&d"
+        beliefs = [
+            ["a|b", 0.1],
+            ["c&d", 0.4]
         ]
-        self.beliefs = [ Belief(sp.parse_expr(x)) for x in b_str ]
+        self.beliefs = [ Belief(sp.parse_expr(f), order) for f, order in beliefs ]
     
     def reset(self, formula):
         """ Sets the belief base to be the empty set Ø """
@@ -47,8 +39,9 @@ class BeliefBase:
 
 
 class Belief:
-    def __init__(self, formula):
+    def __init__(self, formula, order):
         self.formula = formula
+        self.order = order
 
     def __repr__(self):
-        return f'Belief({self.formula})'
+        return f'Belief({self.formula}, {self.order})'
