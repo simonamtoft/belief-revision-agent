@@ -15,7 +15,7 @@ class IOHandler():
             action = input(A_PROMPT).upper()
             try:
                 logic_expr = self.legal_actions[action][1](self.bb, self)
-                return action, logic_expr
+                return action, logic_expr, None
             except Exception as e:
                 print(f"Error: {e} is not a valid action key.")
                 print(f"Possible keys: {list(self.legal_actions.keys())}")
@@ -29,32 +29,50 @@ def print_help_menu(bb, ioh):
 
 def get_contraction(bb, ioh):
     while True:
-        print("Input contraction expression")
+        print("Input expression for contraction")
         action = input(L_PROMPT)
         try:
-            return sp.parse_expr(action)
+            return sp.parse_expr(action), None, None
         except Exception as e:
             print(f"Error: {e} is not a valid logical expression.")
 
 
 def get_expansion(bb, ioh):
     while True:
-        print("Input expansion expression")
+        print("Input expression for expansion")
         action = input(L_PROMPT)
         try:
-            return sp.parse_expr(action)
+            return sp.parse_expr(action), None, None
         except Exception as e:
             print(f"Error: {e} is not a valid logical expression.")
+
+
+def get_revision(bb, ioh):
+    while True:
+        print("Input expression for revision")
+        action = input(L_PROMPT)
+        try:
+            f = sp.parse_expr(action)
+        except Exception as e:
+            print(f"Error: {e} is not a valid logical expression.")
+        
+        print("Select order (from 0 to 1)")
+        try:
+            order = float(input(L_PROMPT))
+        except Exception as e:
+            print(f"Error: {e} is not a valid float number.")
+        
+        return action, f, order
 
 
 def print_beliefbase(bb, ioh):
     print("The current Belief Base is:")
     print(bb)
-    return None
+    return None, None, None
 
 
 def placeholder(bb, ioh):
-    return None
+    return None, None, None
 
 
 LEGAL_ACTIONS = {
@@ -62,8 +80,9 @@ LEGAL_ACTIONS = {
     'E': ["Expansion", get_expansion],
     'I': ["Instantiate Belief Base", placeholder],
     'P': ["Print Belief Base", print_beliefbase],
-    'R': ["Reset Belief Base", placeholder],
+    'E': ["Empty Belief Base", placeholder],
     'H': ["Print help dialog", print_help_menu],
+    'R': ["Belief Revision", get_revision],
 }
 
 

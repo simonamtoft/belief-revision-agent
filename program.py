@@ -17,28 +17,23 @@ def action_bb_map(bb, action):
         'E': ["Expansion", bb.expand],
         'I': ['Instantiate Beliefs', bb.instantiate],
         'P': ["Print Belief Base", placeholder],
-        'R': ["Reset Belief Base", bb.reset],
-        'H': ["Print help dialog", placeholder]
+        'E': ["Empty Belief Base", bb.reset],
+        'H': ["Print help dialog", placeholder],
+        'R': ["Belief Revision", bb.revise],
     }
     return mapping[action][1]
 
 
 if __name__ == "__main__":
-    print("Program...")
-    sentence = "v >> c | a & c | (d >> b) >> o"
-    s = sp.parse_expr(sentence)
-    
-    print(s)
-    exdsds = to_cnf(s)
-    print(exdsds)
+    print("Program Start")
+    bb = BeliefBase()
+    ioh = IOHandler(bb)
+    print_help_menu(bb, ioh)
 
-    # bb = BeliefBase()
-    # ioh = IOHandler(bb)
-    # print_help_menu(bb, ioh)
-
-    # while True:
-    #     a, logic_expr = ioh.get_user_input()
-    #     bb_func = action_bb_map(bb, a)
-    #     bb_func(logic_expr)
+    while True:
+        a, f, order = ioh.get_user_input()
+        # print(f, order)
+        bb_func = action_bb_map(bb, a)
+        bb_func(f)
 
     

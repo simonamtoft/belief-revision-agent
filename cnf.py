@@ -76,7 +76,7 @@ def distribute_and_over_or(s):
         rest = associate(Or, others)
         return associate(And, [distribute_and_over_or(c | rest)
                                for c in conj.args])
-    elif s.op == And:
+    elif s.func == And:
         return associate(And, list(map(distribute_and_over_or, s.args)))
     else:
         return s

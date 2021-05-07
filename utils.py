@@ -4,6 +4,12 @@ from sympy.logic.boolalg import Or, And
 _op_identity = {And: True, Or: False}
 
 
+def check_value(order):
+    """ Checks that the value of order is between 0 and 1 """
+    if not (0 <= order <= 1):
+        raise ValueError
+
+
 def unique(sequence):
     """ Returns the sequence without duplicate elements """
     return list(set(sequence))
