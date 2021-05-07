@@ -82,7 +82,9 @@ class BeliefBase:
         base = []
         for order, group in self.grp_by_order():
             base += [b.formula for b in group]
-            if entails(base, f):
+            bb = BeliefBase()
+            bb.instantiate(base)
+            if entails(bb, f):
                 return order
         return 0
 
