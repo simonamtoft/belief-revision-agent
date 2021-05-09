@@ -1,9 +1,10 @@
 import sympy as sp
 from sympy.logic.boolalg import true, false, And, Or, Implies, Not, Equivalent
-from entailment import entails
+from entailment2 import entails
 from utils import check_value
 from cnf import to_cnf
 from sortedcontainers import SortedList
+from functools import reduce
 import math
 
 
@@ -12,7 +13,7 @@ import math
 class BeliefBase:
     def __init__(self):
         # Sort beliefs in descending order with respect to their order value
-        self.beliefs = SortedList(key=lambda b: 1 - b.order)
+        self.beliefs = SortedList(key=lambda b: -b.order)
         self.reorder_queue = []
 
     def fix_belief_ordering(self):
@@ -158,12 +159,11 @@ class BeliefBase:
         
         self.add(f, order)
 
-
-    def instantiate(self, formula):
+    def instantiate(self, formula=None):
         """ Instantiate the Belief Base with some predetermined beliefs """
         beliefs = [
-            ["a|b", 0.1],
-            ["c&d", 0.4]
+            ["a|b", 1],
+            ["c&d", 4]
         ]
         for f, order in beliefs:
             self.beliefs.add(Belief(sp.parse_expr(f), order))
@@ -177,6 +177,61 @@ class BeliefBase:
             return "BeliefBase(Ø)"
         return 'BeliefBase([\n  {}\n])'.format(",\n  ".join(str(x) for x in self.beliefs))
 
+    def rank(self, formula):
+        bb = true
+        r = self.beliefs[0].order
+        for belief in self.beliefs:
+            if belief.order < r:
+                if entails(to_cnf(bb), formula):
+                    return r
+                r = belief.order
+            bb = bb & belief.formula
+        return r if entails(to_cnf(bb), formula) else 0
+    
+    def expand(self, formula, newrank):
+        if self.rank(Not(formula)) > 0:
+            print(">>> Formula is inconsistent with belief basis")
+            return
+        oldrank = self.rank(formula)
+        if newrank <= oldrank:
+            print(">>> Desired rank is lower than or equal to existing rank")
+            return
+        for belief in self.beliefs:
+            if formula == belief.formula:
+                self.beliefs.remove(belief)
+        self.beliefs.add(Belief(formula, newrank))
+        for belief in self.beliefs:
+            if oldrank <= belief.order <= newrank:
+                bb = [x.formula for x in filter(lambda x: x.order >= belief.order and x != belief, self.beliefs)]
+                bb = to_cnf(reduce(lambda x, y: x & y, bb, true))
+                if entails(bb, belief.formula):
+                    print(f">>> {belief} is redundant")
+                    self.beliefs.remove(belief)
+    
+    def contract(self, formula):
+        if entails(true, formula):
+            print(f"{formula} is a tautology")
+            return
+        oldrank = self.rank(formula)
+        delta = BeliefBase()
+        delta.beliefs = self.beliefs.copy()
+        for belief in self.beliefs:
+            if belief.order <= oldrank:
+                bb = [x.formula for x in filter(lambda x: x.order >= (oldrank + 1), delta.beliefs)]
+                bb = to_cnf(reduce(lambda x, y: x & y, bb, true))
+                if not entails(bb, formula | belief.formula):
+                    r = delta.rank(belief.formula)
+                    delta.beliefs.remove(belief)
+                    if r < oldrank or not entails(bb, formula >> belief.formula):
+                        for b in self.beliefs:
+                            if formula >> belief.formula == b.formula:
+                                delta.beliefs.remove(b)
+                        delta.beliefs.add(Belief(formula >> belief.formula, r))
+        self.beliefs = delta.beliefs
+
+
+            
+
 
 class Belief:
     def __init__(self, formula, order):
@@ -184,10 +239,22 @@ class Belief:
         self.order = order
 
     def __repr__(self):
-        return f'Belief({self.formula}, {self.order})'
+        return f'Belief({self.formula}, rank={self.order})'
     
     def __eq__(self, other):
         return self.order == other.order and self.formula == other.formula
 
 
 EMPTY_BB = BeliefBase()
+
+
+if __name__ == "__main__":
+    bb = BeliefBase()
+    bb.beliefs.add(Belief(sp.parse_expr("p"),    1))
+    bb.beliefs.add(Belief(sp.parse_expr("q"),    1))
+    bb.beliefs.add(Belief(sp.parse_expr("p>>q"), 1))
+
+    bb.contract(sp.parse_expr("~(q>>p)"))
+    print(bb)
+    bb.expand(sp.parse_expr("q>>p"), 1)
+    print(bb)
