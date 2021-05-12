@@ -20,7 +20,3 @@ if __name__ == "__main__":
             bb.contract(f)
         elif a == 'A':
             bb.expand(f, rank)
-
-
-
-    
