@@ -16,6 +16,10 @@ if __name__ == "__main__":
             bb.reset()
         elif a == 'R':
             bb.revision(f, rank)
+        elif a == 'C':
+            bb.contract(f)
+        elif a == 'A':
+            bb.expand(f, rank)
 
 
 
