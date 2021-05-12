@@ -1,7 +1,22 @@
-import sympy as sp
-from sympy.logic.boolalg import true, false, And, Or, Implies, Not, Equivalent
-# from sympy.parsing.sympy_parser import parse_expr
-from utils import associate, first
+from sympy.logic.boolalg import And, Or, Implies, Not
+
+
+def first(iterable, default=None):
+    """ Returns the first element of an iterable """
+    return next(iter(iterable), default)
+
+
+def associate(op, args):
+    """ Given an associative operator, return an flattened expression 
+    such that nested instances of the same operator is at the top level.
+    """
+    args = dissociate(op, args)
+    if len(args) == 0:
+        return _op_identity[op]
+    elif len(args) == 1:
+        return args[0]
+    else:
+        return op(*args)
 
 
 def is_symbol(s):
