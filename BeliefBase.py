@@ -50,12 +50,16 @@ class BeliefBase:
         if newrank <= oldrank:
             print(">>> Desired rank is lower than or equal to existing rank")
             return
-        for belief in self.beliefs:
+
+        beliefs = self.beliefs.copy() # work around shenanigans that happen when deleting from a SortedList you're iterating over
+        for belief in beliefs:
             if formula == belief.formula:
                 self.beliefs.remove(belief)
         self.beliefs.add(Belief(formula, newrank))
         print(f">>> {formula} added to belief basis with rank {newrank}")
-        for belief in self.beliefs:
+
+        beliefs = self.beliefs.copy()
+        for belief in beliefs:
             if oldrank <= belief.rank <= newrank:
                 bb = [to_cnf(x.formula) for x in filter(lambda x: x.rank >= belief.rank and x != belief, self.beliefs)]
                 bb = reduce(lambda x, y: x & y, bb, true)
@@ -67,6 +71,7 @@ class BeliefBase:
         if entails(true, formula):
             print(f">>> {formula} is a tautology")
             return
+
         oldrank = self.rank(formula)
         delta = BeliefBase()
         delta.beliefs = self.beliefs.copy()
