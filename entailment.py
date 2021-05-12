@@ -1,67 +1,56 @@
 import sympy as sp
-from sympy.logic.boolalg import Or
 
-from utils import unique, conjuncts, disjuncts, associate
-from cnf import to_cnf
+def check_all(kb, formula, symbols, model):
 
+    if not symbols:
+        if kb.subs(model) == True:
+            result = formula.subs(model)
+            assert result in (True, False)
+            return result
+        else:
+            return True
+    else:
+        P = symbols.pop()
+        m_true = model.copy();    m_false = model.copy()
+        m_true[P] = True;         m_false[P] = False
 
-def entails(bb, formula):
-    """ Check Entailment of given formula in belief base bb """
+        result = check_all(kb, formula, symbols.copy(), m_true) and check_all(kb, formula, symbols.copy(), m_false)
+        return result
 
-    formula = to_cnf(formula)
+def entails(kb, formula):
+    """
+    KB should be knowledge basis in conjunctive normal form.
+    """
+    symbols = (kb & formula).binary_symbols
+    return check_all(kb, formula, symbols, {})
 
-    # Split all formulas from belief base into conjuncts
-    sentences = []
-    for belief in bb.beliefs:
-        sentences += conjuncts(belief.formula)
+if __name__ == "__main__":
+    kb = sp.parse_expr("p & q")
+    formula = sp.parse_expr("z")
 
-    # Add contradiction to start resolution
-    sentences += conjuncts(to_cnf(~formula))
+    kb_entails_formula = entails(kb, formula)
+    print(kb_entails_formula)
 
-    # Check if any of the sentences are already false
-    if False in sentences:
-        return True
+    kb = sp.parse_expr("p & q")
+    formula = sp.parse_expr("p >> q")
 
-    result = set()
-    while True:
-        n = len(sentences)
-        pairs = [
-            (sentences[i], sentences[j])
-            for i in range(n) for j in range(i + 1, n)
-        ]
+    kb_entails_formula = entails(kb, formula)
+    print(kb_entails_formula)
 
-        for si, sj in pairs:
-            resolvents = resolve(si, sj)
-            if False in resolvents:
-                return True
-            result = result.union(set(resolvents))
+    kb = sp.parse_expr("p & q")
+    formula = sp.parse_expr("z >> q")
 
-        if result.issubset(set(sentences)):
-            return False
-        for s in result:
-            if s not in sentences:
-                sentences.append(c)
+    kb_entails_formula = entails(kb, formula)
+    print(kb_entails_formula)
 
+    kb = sp.parse_expr("p & q")
+    formula = sp.parse_expr("~q >> p")
 
-def resolve(si, sj):
-    """ Perform resolution on the two sentences si and sj """
+    kb_entails_formula = entails(kb, formula)
+    print(kb_entails_formula)
 
-    sentences = []
-    dsi = disjuncts(si)
-    dsj = disjuncts(sj)
+    kb = sp.parse_expr("(a|b)&c&d")
+    formula = sp.parse_expr("c")
 
-    for di in dsi:
-        for dj in dsj:
-            if di == ~dj or ~di == dj:
-                # Create list of all disjuncts except di and dj
-                res = removeall(di, dsi) + removeall(dj, dsj)
-
-                # Remove duplicates
-                res = unique(res)
-                
-                # Join into new clause
-                dnew = associate(Or, res)
-
-                sentences.append(dnew)
-
-    return sentences
+    kb_entails_formula = entails(kb, formula)
+    print(kb_entails_formula)
