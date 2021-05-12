@@ -1,4 +1,5 @@
 import sympy as sp
+from cnf import to_cnf
 
 
 def check_all(kb, formula, symbols, model):
@@ -22,6 +23,7 @@ def entails(kb, formula):
     """
     The knowledge base 'kb' should be a knowledge base in conjunctive normal form.
     """
+    formula = to_cnf(formula)
     symbols = (kb & formula).binary_symbols
     return check_all(kb, formula, symbols, {})
 
