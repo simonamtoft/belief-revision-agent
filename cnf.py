@@ -3,6 +3,7 @@ from sympy.logic.boolalg import true, false, And, Or, Implies, Not, Equivalent
 # from sympy.parsing.sympy_parser import parse_expr
 from utils import associate, first
 
+
 def is_symbol(s):
     return isinstance(s, str) and s[:1].isalpha()
 

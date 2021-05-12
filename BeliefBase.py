@@ -5,19 +5,23 @@ from cnf import to_cnf
 from sortedcontainers import SortedList
 from functools import reduce
 
+# add a shorthand to use the sympy expression parser
+pl = sp.parse_expr
+
+
 class BeliefBase:
     def __init__(self):
-        # Sort beliefs in descending order with respect to their order value
-        self.beliefs = SortedList(key=lambda b: -b.order)
+        # Sort beliefs in descending order with respect to their rank value
+        self.beliefs = SortedList(key=lambda b: -b.rank)
 
-    def instantiate(self, formula=None):
+    def instantiate(self):
         """ Instantiate the Belief Base with some predetermined beliefs """
         self.expand(pl("(p & q) >> r"), 100)
         self.expand(pl("r"), 10)
         self.expand(pl("p"), 20)
         self.expand(pl("q"), 30)
 
-    def reset(self, formula):
+    def reset(self):
         """ Sets the belief base to be the empty set Ø """
         self.beliefs.clear()
 
@@ -29,12 +33,12 @@ class BeliefBase:
     def rank(self, formula):
         formula = to_cnf(formula)
         bb = true
-        r = self.beliefs[0].order if self.beliefs else 0
+        r = self.beliefs[0].rank if self.beliefs else 0
         for belief in self.beliefs:
-            if belief.order < r:
+            if belief.rank < r:
                 if entails(bb, formula):
                     return r
-                r = belief.order
+                r = belief.rank
             bb = bb & to_cnf(belief.formula)
         return r if entails(bb, formula) else 0
     
@@ -52,8 +56,8 @@ class BeliefBase:
         self.beliefs.add(Belief(formula, newrank))
         print(f">>> {formula} added to belief basis with rank {newrank}")
         for belief in self.beliefs:
-            if oldrank <= belief.order <= newrank:
-                bb = [to_cnf(x.formula) for x in filter(lambda x: x.order >= belief.order and x != belief, self.beliefs)]
+            if oldrank <= belief.rank <= newrank:
+                bb = [to_cnf(x.formula) for x in filter(lambda x: x.rank >= belief.rank and x != belief, self.beliefs)]
                 bb = reduce(lambda x, y: x & y, bb, true)
                 if entails(bb, belief.formula):
                     print(f">>> Removed {belief} as it is redundant")
@@ -67,8 +71,8 @@ class BeliefBase:
         delta = BeliefBase()
         delta.beliefs = self.beliefs.copy()
         for belief in self.beliefs:
-            if belief.order <= oldrank:
-                bb = [to_cnf(x.formula) for x in filter(lambda x: x.order >= (oldrank + 1), delta.beliefs)]
+            if belief.rank <= oldrank:
+                bb = [to_cnf(x.formula) for x in filter(lambda x: x.rank >= (oldrank + 1), delta.beliefs)]
                 bb = reduce(lambda x, y: x & y, bb, true)
                 if not entails(bb, formula | belief.formula):
                     r = delta.rank(belief.formula)
@@ -84,31 +88,27 @@ class BeliefBase:
         self.beliefs = delta.beliefs
 
     def revision(self, formula, newrank):
-        self.contract(Not(formula))
-        self.expand(formula, newrank)
+        if 0 <= newrank:
+            self.contract(Not(formula))
+            self.expand(formula, newrank)
+        else: 
+            print(f"Rank {newrank} is negative.\nRevision not done.")
+
 
 class Belief:
-    def __init__(self, formula, order):
+    def __init__(self, formula, rank):
         self.formula = formula
-        self.order = order
+        self.rank = rank
 
     def __repr__(self):
-        return f'Belief({self.formula}, rank = {self.order})'
+        return f'Belief({self.formula}, rank = {self.rank})'
     
     def __eq__(self, other):
-        return self.order == other.order and self.formula == other.formula
+        return self.rank == other.rank and self.formula == other.formula
+
 
 if __name__ == "__main__":
-    pl = sp.parse_expr
     bb = BeliefBase()
-    # bb.beliefs.add(Belief(sp.parse_expr("p"),    1))
-    # bb.beliefs.add(Belief(sp.parse_expr("q"),    1))
-    # bb.beliefs.add(Belief(sp.parse_expr("p>>q"), 1))
-
-    # bb.contract(sp.parse_expr("~(q>>p)"))
-    # print(bb)
-    # bb.expand(sp.parse_expr("q>>p"), 1)
-    # print(bb)
 
     #  Example from Wobcke paper
     bb.expand(pl("(p & q) >> r"), 100)
@@ -124,7 +124,4 @@ if __name__ == "__main__":
     print(bb)
 
     bb.revision(pl("~r"), 40)
-    print(bb)
-
-    bb.revision(pl("r"), 30)
     print(bb)

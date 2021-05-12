@@ -1,7 +1,7 @@
 import sympy as sp
 
-def check_all(kb, formula, symbols, model):
 
+def check_all(kb, formula, symbols, model):
     if not symbols:
         if kb.subs(model) == True:
             result = formula.subs(model)
@@ -17,12 +17,14 @@ def check_all(kb, formula, symbols, model):
         result = check_all(kb, formula, symbols.copy(), m_true) and check_all(kb, formula, symbols.copy(), m_false)
         return result
 
+
 def entails(kb, formula):
     """
-    KB should be knowledge basis in conjunctive normal form.
+    The knowledge base 'kb' should be a knowledge base in conjunctive normal form.
     """
     symbols = (kb & formula).binary_symbols
     return check_all(kb, formula, symbols, {})
+
 
 if __name__ == "__main__":
     kb = sp.parse_expr("p & q")
