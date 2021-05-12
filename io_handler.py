@@ -63,4 +63,5 @@ LEGAL_ACTIONS = {
     'E': ["Empty Belief Base", placeholder],
     'H': ["Print help dialog", print_help_menu],
     'R': ["Belief Revision", get_revision],
+    'Q': ["Quit Program", placeholder]
 }

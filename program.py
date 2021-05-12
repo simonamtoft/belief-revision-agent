@@ -16,6 +16,8 @@ if __name__ == "__main__":
             bb.reset()
         elif a == 'R':
             bb.revision(f, rank)
+        elif a == 'Q':
+            exit()
 
 
 

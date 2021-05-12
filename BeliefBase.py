@@ -16,10 +16,11 @@ class BeliefBase:
 
     def instantiate(self):
         """ Instantiate the Belief Base with some predetermined beliefs """
+        self.reset()
         self.expand(pl("(p & q) >> r"), 100)
         self.expand(pl("r"), 10)
         self.expand(pl("p"), 20)
-        self.expand(pl("q"), 30)
+        # self.expand(pl("q"), 30)
 
     def reset(self):
         """ Sets the belief base to be the empty set Ø """
