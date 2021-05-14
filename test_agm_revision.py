@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # inclusion
     print(f'\rcontract with {phi}, then expand with {phi}')
     bb.contract(phi)
-    # bb.expand(phi, 30)
+    bb.expand(phi, 30)
     print(bb)
 
 
